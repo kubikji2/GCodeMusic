@@ -2,6 +2,8 @@
 # basic explanation and original snippet based on the:
 # https://www.johndcook.com/blog/2016/02/10/musical-pitch-notation/
 
+
+# scale
 notes = ["A", "A#", "H", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"]
 
 
@@ -17,7 +19,7 @@ def read_file(filename : str):
 
 # metadata:
 # tempo -- beats per minute
-# TODO add other arguments such as hashes and "b"
+# ... possible other data included in the future
 def parse_meta_data(meta_data : str):
     meta_data = meta_data.replace("\n","").split()
     tempo = int(meta_data[0])
@@ -25,17 +27,20 @@ def parse_meta_data(meta_data : str):
     return tempo
 
 
-def parse_note_data(node_data : list):
-    music = []
-    for data in node_data:
+# parse note data 
+def parse_note_data(note_data : list):
+    music_data = []
+    for data in note_data:
         entries = data.replace("\n","").split()
         note = entries[0]
         dur = int(entries[1][0])
         dot = True if entries[-1] == "." else False
+        # creating music data
         md = (get_frequency(note), get_duration(dur,dot))
-        music.append(md)
-    return music
+        music_data.append(md)
+    return music_data
 
+# transpose from flat to sharp notation
 def transpose(note: str):
     
     octave = int(note[-1])
@@ -72,18 +77,26 @@ def get_duration(nl : int, dot = False):
     ext = 0.5*base if dot else 0
     return base+ext
 
-
-def create_gcode(tempo:int, music : list):
+# create gcode from music data and tempo
+def create_gcode(tempo : int, music_data : list):
     gcode = ""
-    for data in music:
+    for data in music_data:
         fqn = data[0]
         dur = data[1]*tempo
         gcode += f'M300 S{fqn} P{round(dur)}\n'
         
     print(gcode)
+    return gcode
+
+# writes gcode to the given file
+def write_gcode(filename : str, gcode : str):
+    out = open(filename, "w")
+    out.write(gcode)
+
 
 if __name__ == "__main__":
     print(get_frequency("C0"))
     print(get_duration(4,True))
     tempo, music = read_file("imperial_march.nf")
-    create_gcode(tempo,music)
+    gc = create_gcode(tempo,music)
+    write_gcode("im.gcode",gc)
