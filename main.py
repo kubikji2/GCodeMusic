@@ -68,11 +68,22 @@ def get_frequency(note : str):
 # - half note       nl = 2
 # - quarter note    nl = 4 etc.
 def get_duration(nl : int, dot = False):
-    base = 1000/nl
+    base = 1.0/nl
     ext = 0.5*base if dot else 0
-    return round(base+ext)
+    return base+ext
+
+
+def create_gcode(tempo:int, music : list):
+    gcode = ""
+    for data in music:
+        fqn = data[0]
+        dur = data[1]*tempo
+        gcode += f'M300 S{fqn} P{round(dur)}\n'
+        
+    print(gcode)
 
 if __name__ == "__main__":
     print(get_frequency("C0"))
     print(get_duration(4,True))
-    read_file("imperial_march.nf")
+    tempo, music = read_file("imperial_march.nf")
+    create_gcode(tempo,music)
