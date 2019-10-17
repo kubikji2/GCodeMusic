@@ -17,6 +17,15 @@ def get_frequency(note : str):
 
     return round(440 * pow(2, (key_number- 49) / 12))
 
+# note lenght is 1/nl [ms]
+# - whole note      nl = 1
+# - half note       nl = 2
+# - quarter note    nl = 4 etc.
+def get_len(nl : int, dot = False):
+    base = 1000/nl
+    ext = 0.5*base if dot else 0
+    return round(base+ext)
 
 if __name__ == "__main__":
     print(get_frequency("C0"))
+    print(get_len(4,True))
