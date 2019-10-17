@@ -2,9 +2,55 @@
 # basic explanation and original snippet based on the:
 # https://www.johndcook.com/blog/2016/02/10/musical-pitch-notation/
 
+notes = ["A", "A#", "H", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"]
+
+
+# read file and parse it
+def read_file(filename : str):
+    src = open(filename, "r")
+    lines = src.readlines()
+    meta_data = lines[0]
+    note_data = lines[1:]
+
+    return parse_meta_data(meta_data), parse_note_data(note_data)
+
+
+# metadata:
+# tempo -- beats per minute
+# TODO add other arguments such as hashes and "b"
+def parse_meta_data(meta_data : str):
+    meta_data = meta_data.replace("\n","").split()
+    tempo = int(meta_data[0])
+    tempo = (1000*60.0)/tempo
+    return tempo
+
+
+def parse_note_data(node_data : list):
+    music = []
+    for data in node_data:
+        entries = data.replace("\n","").split()
+        note = entries[0]
+        dur = int(entries[1][0])
+        dot = True if entries[-1] == "." else False
+        md = (get_frequency(note), get_duration(dur,dot))
+        music.append(md)
+    return music
+
+def transpose(note: str):
+    
+    octave = int(note[-1])
+    note_name = note[:-1].replace("b","")
+    
+    octave = octave if note_name != "A" else octave -1
+    note_name = notes[notes.index(note_name)-1]
+    
+    return note_name + str(octave)
+
+
 # note example A4
 def get_frequency(note : str):
-    notes = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
+
+    note = note if note.count("b") == 0 else transpose(note)
 
     note_name = note[:-1]
     octave = int(note[-1])
@@ -21,11 +67,12 @@ def get_frequency(note : str):
 # - whole note      nl = 1
 # - half note       nl = 2
 # - quarter note    nl = 4 etc.
-def get_len(nl : int, dot = False):
+def get_duration(nl : int, dot = False):
     base = 1000/nl
     ext = 0.5*base if dot else 0
     return round(base+ext)
 
 if __name__ == "__main__":
     print(get_frequency("C0"))
-    print(get_len(4,True))
+    print(get_duration(4,True))
+    read_file("imperial_march.nf")
